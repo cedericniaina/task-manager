@@ -1,0 +1,9 @@
+Status_projetDurree_projet = (id_durre INT AUTO_INCREMENT, creation DATETIME, limite DATETIME);
+Individu = (id_individue INT AUTO_INCREMENT, nom VARCHAR(50) , photo_profil BLOB);
+Competence = (id_competenece INT AUTO_INCREMENT, nom_competence VARCHAR(50) );
+Status_projet = (id_status INT AUTO_INCREMENT, status VARCHAR(50) , #id_durre);
+Projet = (id_projet INT AUTO_INCREMENT, nom VARCHAR(50) , #id_status);
+Tache = (id_tache INT AUTO_INCREMENT, nom VARCHAR(50) , #id_projet);
+Fonction = (#id_tache, #id_individue, status VARCHAR(50) );
+Maitrise = (#id_individue, #id_competenece);
+Membre = (#id_projet, #id_individue);

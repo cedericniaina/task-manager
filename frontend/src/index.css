@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --base: #ecfdf5;
+  --secondary: #a7f3d0;
+  --accent: #34d399;
+  --primary: #059669;
+  --foreground: #064e3b;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #dc2626;
+  --info: #0284c7;
+  --light: #ffffff;
+  --dark: #000;
+  --shadow: #00000075;
+  --border: #018359;
+}
+/*================= PALLETTE FOR Light THEME*/
+[data-theme="light"] {
+  --base: #ecfdf5;
+  --secondary: #a7f3d0;
+  --accent: #34d399;
+  --primary: #059669;
+  --foreground: #064e3b;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #dc2626;
+  --info: #0284c7;
+  --light: #fff;
+  --dark: #000;
+  --shadow: #00000075;
+  --border: #018359;
+}
+
+@theme {
+  --color-base: var(--base);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-primary: var(--primary);
+  --color-foreground: var(--foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-light: var(--light);
+  --color-dark: var(--dark);
+  --color-shadow: var(--shadow);
+  --color-border: var(--border);
+}

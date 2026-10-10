@@ -1,9 +1,12 @@
 {
   "name": "task-manager/backend",
   "license": "MIT",
+  "scripts": {
+    "start": "php -S localhost:8000 -t public"
+  },
   "autoload": {
     "psr-4": {
-      "App\\": "src/"
+      "App\\": "./src"
     }
   },
   "require": {

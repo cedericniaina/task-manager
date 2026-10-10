@@ -1,7 +1,7 @@
 CREATE TABLE individu(
    id_individu INT AUTO_INCREMENT,
    nom_individu VARCHAR(50)  NOT NULL,
-   photo_profil_individu BLOB,
+   pdp_individu_url VARCHAR(150) ,
    PRIMARY KEY(id_individu),
    UNIQUE(nom_individu)
 );
@@ -16,7 +16,8 @@ CREATE TABLE utilisateur(
    id_utilisateur VARCHAR(50) ,
    nom_utilisateur VARCHAR(50)  NOT NULL,
    email VARCHAR(50)  NOT NULL,
-   photo_profil_utilisateur BLOB,
+   pdp_utilisateur_url VARCHAR(150) ,
+   mot_de_passe VARCHAR(60)  NOT NULL,
    PRIMARY KEY(id_utilisateur),
    UNIQUE(email)
 );
@@ -31,14 +32,13 @@ CREATE TABLE Projet(
    id_projet INT AUTO_INCREMENT,
    nom_projet VARCHAR(50)  NOT NULL,
    status_projet VARCHAR(50) ,
-   time_creation TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   time_creation TIMESTAMP NOT NULL,
    deadline DATE,
    description_projet VARCHAR(300) ,
    id_utilisateur VARCHAR(50)  NOT NULL,
    PRIMARY KEY(id_projet),
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
-CREATE INDEX idx_nom_project ON project(nom_projet);
 
 CREATE TABLE activite(
    id_activite INT AUTO_INCREMENT,

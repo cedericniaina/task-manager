@@ -6,6 +6,7 @@ class Database
     {
         $this->connection = new PDO("mysql:host=$host;dbname=$dbName;charset=utf8mb4", $userName, $password);
     }
+    // ==================================== ADD
     public function addUser(string $username, string $email, string $password)
     {
         $sql = "INSERT INTO utilisateur(nom,email,password) VALUES (:nom,:email,:password) ";
@@ -15,5 +16,59 @@ class Database
             "email"=>$email,
             "password"=>$password,
         ]);
+    }
+    public function addProject(){
+        return "";
+    }
+    public function addTag(){
+        return "";
+    }
+    public function addIndividu(){
+        return "";
+    }
+    // ==================================== OBTENIR
+    public function getInfo(){
+        return "";
+    }
+    public function getTag(){
+        return "";
+    }
+    public function getActivite(){
+        return "";
+    }
+    public function getIndividu(){
+        return "";
+    }
+    public function getCompetence(){
+        return "";
+    }
+    // =================================== UPDATE
+    public function updateProject(){
+        return "";
+    }
+    public function updateIndividu(){
+        return "";
+    }
+    public function updateTag(){
+        return "";
+    }
+    public function updateCompetence(){
+        return "";
+    }
+    public function updateTache(){
+        return "";
+    }
+    // =================================== Delete
+    public function deleteProject(){
+        return "";
+    }
+    public function deleteTache(){
+        return "";
+    }
+    public function deleteTag(){
+        return "";
+    }
+    public function deleteCompetence(){
+        return "";
     }
 }

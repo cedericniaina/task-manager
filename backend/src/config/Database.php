@@ -26,6 +26,9 @@ class Database
     public function addIndividu(){
         return "";
     }
+    public function addTache(){
+        return "";
+    }
     // ==================================== OBTENIR
     public function getInfo(){
         return "";

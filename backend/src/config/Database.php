@@ -9,12 +9,12 @@ class Database
     // ==================================== ADD
     public function addUser(string $username, string $email, string $password)
     {
-        $sql = "INSERT INTO utilisateur(nom,email,password) VALUES (:nom,:email,:password) ";
+        $sql = "INSERT INTO utilisateur(nom_utilisateur,email,mot_de_passe) VALUES (:nom_utilisateur,:email,:mot_de_passe) ";
         $query = $this->connection->prepare($sql);
         $query->execute([
-            "nom"=>$username,
+            "nom_utilisateur"=>$username,
             "email"=>$email,
-            "password"=>$password,
+            "mot_de_passe"=>$password,
         ]);
     }
     public function addProject(){

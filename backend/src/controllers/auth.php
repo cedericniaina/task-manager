@@ -16,7 +16,7 @@ class Auth extends Request{
     public function authSignup() {
         header('Content-Type: application/json');
         $body = $this->input();
-        $this->db->addUser($body["nom"], $body["email"], $body["password"]);
+        $this->db->addUser($body["nom_utilisateur"], $body["email"], $body["mot_de_passe"]);
         // // NOT FINISHED
         return json_encode($body);
     }

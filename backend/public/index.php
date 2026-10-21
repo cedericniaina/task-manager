@@ -138,7 +138,7 @@ $route->patch("/delete/competence", function () use ($delete) {
 });
 
 // =============================================== TEST
-$route->get("/test", function () {
+$route->get("/", function () {
     header('Content-Type: application/json');
     $data = ["message"=>"Hello"];
     return json_encode($data);

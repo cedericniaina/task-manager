@@ -6,20 +6,29 @@ class Info extends Request
         // =============== GIVE THE GLOBAL INFO OF AN USER
         return $this->db->getInfo();
     }
+    public function getActivite()
+    {
+        // =============== GET THE ALL ACTIVITE IN A PROJECT
+        return $this->db->getActivite();
+    }
     public function getTag()
     {
-        return $this->db->getTag();
+
+        header('Content-Type: application/json');
+        $rs = $this->db->getTag();
+        return json_encode($rs);
     }
     public function getCompetence()
     {
-        return $this->db->getCompetence();
+        header('Content-Type: application/json');
+        $rs = $this->db->getCompetence();
+        return json_encode($rs);
     }
-    public function getActivite()
-    {
-        return $this->db->getActivite();
-    }
+
     public function getIndividu()
     {
-        return $this->db->getIndividu();
+        header('Content-Type: application/json');
+        $rs = $this->db->getIndividu();
+        return json_encode($rs);
     }
 }

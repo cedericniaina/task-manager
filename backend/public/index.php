@@ -39,20 +39,20 @@ $route->post("/auth/login", function () use ($auth) {
     return $auth->authLogin();
 });
 // ========================================== INFO
-$route->get("/info/:userId", function () use ($info) {
-    return $info->getInfo();
+$route->get("/info/competence", function () use ($info) {
+    return $info->getCompetence();
 });
 $route->get("/info/tag", function () use ($info) {
     return $info->getTag();
 });
-$route->get("/info/activite", function () use ($info) {
-    return $info->getActivite();
-});
 $route->get("/info/individu", function () use ($info) {
     return $info->getIndividu();
 });
-$route->get("/info/competence", function () use ($info) {
-    return $info->getCompetence();
+$route->get("/info/activite", function () use ($info) {
+    return $info->getActivite();
+});
+$route->get("/info/:userId", function () use ($info) {
+    return $info->getInfo();
 });
 // ============================================ UPLOAD
 $route->post("/upload/project", function () use ($upload) {
@@ -90,6 +90,15 @@ $route->post("/upload/tag", function () use ($upload) {
         }
     */
     return $upload->addTag();
+});
+$route->post("/upload/activite", function () use ($upload) {
+    /*
+        Receive :
+        {
+        nom,importance,status,tag
+        }
+    */
+    return $upload->addActivite();
 });
 // ============================================= Modification
 $route->patch("/update/project", function () use ($update) {
@@ -140,7 +149,7 @@ $route->patch("/delete/competence", function () use ($delete) {
 // =============================================== TEST
 $route->get("/", function () {
     header('Content-Type: application/json');
-    $data = ["message"=>"Hello"];
+    $data = ["message" => "Hello"];
     return json_encode($data);
 });
 

@@ -1,4 +1,7 @@
 <?php
+
+use BcMath\Number;
+
 class Database
 {
     private PDO $connection;
@@ -61,11 +64,29 @@ class Database
             "individu_profile_image" => $individu_pdp,
         ]);
     }
-    public function addTache()
+    public function addTache(int $activity_id, int $individu_id, $tache_status = "not finished")
     {
-        return "";
+
+        $sql = "INSERT INTO tache(id_activite,id_individu,status_tache) VALUE (:activity_id,:individu_id,:tache_status)";
+        $query = $this->connection->prepare($sql);
+        $query->execute([
+            "activity_id" => (int) $activity_id,
+            "individu_id" => (int) $individu_id,
+            "tache_status" => $tache_status == null ? "not finished" : $tache_status,
+        ]);
     }
-    public function addActivite()
+    public function addActivite(int $project_id, string $activity_name, int $activity_importance)
+    {
+        // ============================= CODE : X52
+        $sql = "INSERT INTO activite(nom_activite,importance_activite,id_projet) VALUE (:activity_name,:activity_importance,:project_id)";
+        $query = $this->connection->prepare($sql);
+        $query->execute([
+            "project_id" => $project_id,
+            "activity_name" => $activity_name,
+            "activity_importance" => (string) $activity_importance,
+        ]);
+    }
+    public function addProject()
     {
         return "";
     }
@@ -73,10 +94,7 @@ class Database
     {
         return "";
     }
-    public function addProject()
-    {
-        return "";
-    }
+
     public function addCompetence()
     {
         return "";

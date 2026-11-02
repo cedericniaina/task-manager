@@ -23,19 +23,31 @@ class Upload extends Request
             "message" => "Adding Individu success",
         ]);
     }
+    public function addTache()
+    {
+        header('Content-Type: application/json');
+        $input = $this->input();
+        $this->db->addTache($input['activity_id'], $input['individu_id'], $input['tache_status']);
+        return json_encode([
+            "message" => "Adding tache success",
+        ]);
+    }
+    public function addActivite()
+    {
+        header('Content-Type: application/json');
+        $input = $this->input();
+        $this->db->addActivite($input['project_id'], $input['activity_name'], $input['activity_importance']);
+        return json_encode([
+            "message" => "Adding activite success",
+        ]);
+    }
     public function addProject()
     {
         return $this->db->addProject();
     }
 
-    public function addTache()
-    {
-        return $this->db->addTache();
-    }
-    public function addActivite()
-    {
-        return $this->db->addActivite();
-    }
+
+
     // ========================================== NOTE FINISHED
     public function addCompetence()
     {

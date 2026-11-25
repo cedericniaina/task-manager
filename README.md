@@ -15,13 +15,14 @@ Application web de gestion de projets et de tâches, en groupe ou en solo. Les p
    php -S 127.0.0.1:8000 -t backend/public backend/public/index.php
    ```
 
-4. Lancez l’interface dans un second terminal :
+4. Lancez l’interface dans un second terminal. Depuis la racine du projet :
 
    ```sh
-   cd frontend
-   npm install
+   npm install --prefix frontend
    npm run dev
    ```
+
+   Le `package.json` racine redirige `dev`, `build`, `lint` et `preview` vers `frontend/`. Vous pouvez aussi faire `cd frontend && npm install && npm run dev`.
 
 5. Ouvrez l’URL indiquée par Vite (en général `http://localhost:5173`) et créez le compte initial.
 

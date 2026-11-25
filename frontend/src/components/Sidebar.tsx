@@ -4,6 +4,8 @@
 import Title from "./ui/Title";
 import { useState, type ReactElement } from "react";
 import LinkButton from "./ui/LinkButton";
+import { useNavigate } from "react-router";
+import { requestApi } from "../lib/projectApi";
 
 import {
   HomeIcon,
@@ -26,6 +28,7 @@ interface routes {
 }
 export default function Sidebar() {
   const [hidden, setHidden] = useState<boolean>(true);
+  const navigate = useNavigate();
   const styleIcon = "w-5 h-5 my-auto";
   const styleName = "";
   // ================================ LES ROUTER EN MILLEU
@@ -62,7 +65,7 @@ export default function Sidebar() {
       text: (
         <p className="flex flex-row gap-2">
           <ListTodoIcon className={styleIcon}></ListTodoIcon>
-          <span className={styleName}>Tache</span>
+          <span className={styleName}>Tâches</span>
         </p>
       ),
     },
@@ -87,17 +90,16 @@ export default function Sidebar() {
         </p>
       ),
     },
-    {
-      path: "/auth/login",
-      text: (
-        <p className="flex flex-row gap-2">
-          <LogOutIcon className={styleIcon}></LogOutIcon>
-          <span className={styleName}>Deconnecter</span>
-        </p>
-      ),
-      action: () => {},
-    },
   ];
+
+  async function logout() {
+    try {
+      await requestApi("/api?auth=logout", { method: "POST" });
+    } catch {
+      // On quitte l'interface même si la session côté serveur est déjà expirée.
+    }
+    navigate("/auth/login", { replace: true });
+  }
   return (
     <div className="flex flex-col sm:w-65 sm:h-screen h-fit w-screen relative">
       <motion.div className={`sm:hidden bg-foreground flex justify-between`}>
@@ -120,23 +122,34 @@ export default function Sidebar() {
       >
         <LogoTaskManager></LogoTaskManager>
         <div className="flex flex-col gap-2 h-full">
-          {mainRoute.map((item, index) => (
-            <div className="text-light">
-              <LinkButton to={item.path} key={index} text={item.text} />
+          {mainRoute.map((item) => (
+            <div className="text-light" key={item.path}>
+              <LinkButton
+                to={item.path}
+                text={item.text}
+                action={() => setHidden(true)}
+              />
             </div>
           ))}
         </div>
         <div className="py-2">
-          {bottomRoute.map((item, index) => (
-            <div className="text-light">
+          {bottomRoute.map((item) => (
+            <div className="text-light" key={item.path}>
               <LinkButton
                 to={item.path}
-                key={index}
                 text={item.text}
-                action={item.action}
+                action={() => setHidden(true)}
               />
             </div>
           ))}
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className="flex w-full flex-row gap-2 px-2 py-1 text-left text-light transition hover:text-primary"
+          >
+            <LogOutIcon className={styleIcon} />
+            <span>Déconnecter</span>
+          </button>
         </div>
       </motion.div>
     </div>

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router";
 import Title from "../../components/ui/Title";
 import Button from "../../components/ui/Button";
 import MotionColor from "../../components/ui/motion/MotionColors";
+import { requestApiData, type AuthStatus } from "../../lib/projectApi";
 
 interface FormFields {
   nom: string;
@@ -15,33 +16,57 @@ export default function Signin() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function checkAccess() {
+      try {
+        const status = await requestApiData<AuthStatus>("/api?auth=status", {
+          signal: controller.signal,
+        });
+        if (status.authenticated) {
+          navigate("/home", { replace: true });
+        } else if (!status.setupRequired) {
+          navigate("/auth/login", { replace: true });
+        }
+      } catch (caughtError) {
+        if (caughtError instanceof DOMException && caughtError.name === "AbortError") {
+          return;
+        }
+        setError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Impossible de vérifier l’accès à l’inscription.",
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsChecking(false);
+        }
+      }
+    }
+
+    void checkAccess();
+    return () => controller.abort();
+  }, [navigate]);
+
   const onSubmit: SubmitHandler<FormFields> = async ({ nom, email, password }) => {
     setError("");
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api?auth=register", {
+      await requestApiData<NonNullable<AuthStatus["user"]>>("/api?auth=register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ name: nom, email, password }),
       });
-      const result: unknown = await response.json();
-      const serverError =
-        typeof result === "object" &&
-        result !== null &&
-        "error" in result &&
-        typeof result.error === "string"
-          ? result.error
-          : "La création du compte a échoué. Veuillez réessayer.";
-
-      if (!response.ok) {
-        setError(serverError);
-        return;
-      }
-
-      navigate("/auth/login", { replace: true });
-    } catch {
-      setError("Impossible de contacter le serveur. Vérifiez que l’API est démarrée.");
+      navigate("/home", { replace: true });
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Impossible de contacter le serveur. Vérifiez que l’API est démarrée.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -105,16 +130,26 @@ export default function Signin() {
               {error}
             </p>
           )}
+          {isChecking && (
+            <p role="status" className="mt-4 text-sm text-foreground/70">
+              Vérification de l’accès à l’inscription…
+            </p>
+          )}
           <div className="mt-4 flex justify-end">
             <Button
               type="submit"
-              text={isSubmitting ? "Création du compte..." : "Créer mon compte"}
+              text={
+                isChecking
+                  ? "Vérification..."
+                  : isSubmitting
+                    ? "Création du compte..."
+                    : "Créer mon compte"
+              }
               variant="accent"
-              disabled={isSubmitting}
-              className="font-semibold text-white transition-colors hover:bg-primary"
+              disabled={isSubmitting || isChecking}
+              className="font-semibold text-white transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
             ></Button>
           </div>
-          
         </form>
       </div>
     </div>

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import Title from "../../components/ui/Title";
 import Button from "../../components/ui/Button";
 import MotionColor from "../../components/ui/motion/MotionColors";
 import LogoTaskManager from "../../components/ui/icon/LogoTaskManager";
-// import.meta.env.BACKEND_HOST
+import { requestApiData, type AuthStatus } from "../../lib/projectApi";
 
 interface FormFields {
   email: string;
@@ -13,9 +13,36 @@ interface FormFields {
 }
 export default function Login() {
   const { register, handleSubmit } = useForm<FormFields>();
+  const location = useLocation();
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [setupRequired, setSetupRequired] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function checkSetup() {
+      try {
+        const status = await requestApiData<AuthStatus>("/api?auth=status", {
+          signal: controller.signal,
+        });
+        setSetupRequired(status.setupRequired);
+      } catch {
+        // Le lien d'inscription reste masqué par défaut.
+      }
+    }
+    void checkSetup();
+    return () => controller.abort();
+  }, []);
+  const returnTo =
+    typeof location.state === "object" &&
+    location.state !== null &&
+    "from" in location.state &&
+    typeof location.state.from === "string" &&
+    location.state.from.startsWith("/") &&
+    !location.state.from.startsWith("//")
+      ? location.state.from
+      : "/home";
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     setError("");
     setIsSubmitting(true);
@@ -40,7 +67,7 @@ export default function Login() {
         return;
       }
 
-      navigate("/home", { replace: true });
+      navigate(returnTo, { replace: true });
     } catch {
       setError("Impossible de contacter le serveur. Vérifiez que l’API est démarrée.");
     } finally {
@@ -103,12 +130,14 @@ export default function Login() {
                 className="font-semibold text-white transition-colors hover:bg-primary"
               ></Button>
             </div>
-            <div className="mt-3 text-right text-sm">
-              pas encore de compte ?{" "}
-              <a className="font-semibold text-primary hover:underline" href="/auth/signin">
-                inscrivez vous
-              </a>
-            </div>
+            {setupRequired && (
+              <div className="mt-3 text-right text-sm">
+                pas encore de compte ?{" "}
+                <a className="font-semibold text-primary hover:underline" href="/auth/signin">
+                  inscrivez vous
+                </a>
+              </div>
+            )}
           </form>
         </div>
         {/* =================================== FORM */}

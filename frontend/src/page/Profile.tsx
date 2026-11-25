@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
 import { Clock3, LogIn, LogOut, UserPlus, UserRound } from "lucide-react";
-
-interface ProfileData {
-  id_utilisateur: number;
-  nom: string;
-  email: string;
-}
+import {
+  requestApiData,
+  type AuthStatus,
+  type IndividualRecord,
+} from "../lib/projectApi";
 
 interface HistoryItem {
   action: "account_created" | "login" | "logout";
   date_action: string;
-}
-
-interface ApiResponse<T> {
-  data: T;
 }
 
 const historyLabels: Record<HistoryItem["action"], string> = {
@@ -29,7 +24,8 @@ const historyIcons = {
 };
 
 export default function Profile() {
-  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [profile, setProfile] = useState<AuthStatus["user"]>(null);
+  const [individual, setIndividual] = useState<IndividualRecord | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,36 +35,21 @@ export default function Profile() {
 
     async function loadProfile() {
       try {
-        const [statusResponse, historyResponse] = await Promise.all([
-          fetch("/api?auth=status", {
-            credentials: "include",
-            signal: controller.signal,
-          }),
-          fetch("/api?auth=history", {
-            credentials: "include",
-            signal: controller.signal,
-          }),
+        const [authData, historyData, individualData] = await Promise.all([
+          requestApiData<AuthStatus>("/api?auth=status", { signal: controller.signal }),
+          requestApiData<HistoryItem[]>("/api?auth=history", { signal: controller.signal }),
+          requestApiData<IndividualRecord[]>("/api?resource=individuals", { signal: controller.signal }),
         ]);
-
-        const statusResult =
-          (await statusResponse.json()) as ApiResponse<{
-            authenticated: boolean;
-            user: ProfileData | null;
-          }> & { error?: string };
-        const historyResult =
-          (await historyResponse.json()) as ApiResponse<HistoryItem[]> & {
-            error?: string;
-          };
-
-        if (!statusResponse.ok || !statusResult.data?.user) {
-          throw new Error(statusResult.error ?? "Impossible de charger le profil.");
+        if (!authData.user) {
+          throw new Error("Impossible de charger le profil.");
         }
-        if (!historyResponse.ok) {
-          throw new Error(historyResult.error ?? "Impossible de charger l’historique.");
-        }
-
-        setProfile(statusResult.data.user);
-        setHistory(historyResult.data);
+        setProfile(authData.user);
+        setHistory(historyData);
+        setIndividual(
+          individualData.find(
+            (person) => String(person.id_utilisateur) === String(authData.user?.id_utilisateur),
+          ) ?? null,
+        );
       } catch (caughtError) {
         if (caughtError instanceof DOMException && caughtError.name === "AbortError") {
           return;
@@ -115,6 +96,9 @@ export default function Profile() {
             <div className="min-w-0">
               <h2 className="truncate text-xl font-semibold">{profile?.nom}</h2>
               <p className="mt-1 truncate text-sm text-foreground/70">{profile?.email}</p>
+              <p className="mt-1 text-xs text-foreground/60">
+                Personne associée : {individual?.nom ?? "non renseignée"}
+              </p>
             </div>
           </section>
 
@@ -133,7 +117,7 @@ export default function Profile() {
             ) : (
               <ol className="divide-y divide-secondary rounded-xl border border-secondary bg-light px-5">
                 {history.map((item, index) => {
-                  const Icon = historyIcons[item.action];
+                  const Icon = historyIcons[item.action] ?? Clock3;
                   const date = new Date(item.date_action);
                   const formattedDate = Number.isNaN(date.getTime())
                     ? item.date_action
@@ -148,12 +132,12 @@ export default function Profile() {
                         <Icon aria-hidden="true" className="h-4 w-4" />
                       </span>
                       <div>
-                        <p className="font-medium">{historyLabels[item.action]}</p>
+                        <p className="font-medium">
+                          {historyLabels[item.action] ?? item.action}
+                        </p>
                         <time
                           className="mt-1 block text-sm text-foreground/60"
-                          dateTime={
-                            Number.isNaN(date.getTime()) ? undefined : date.toISOString()
-                          }
+                          dateTime={Number.isNaN(date.getTime()) ? undefined : date.toISOString()}
                         >
                           {formattedDate}
                         </time>

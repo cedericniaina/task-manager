@@ -23,7 +23,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/auth/login" replace />,
+        element: <Navigate to="/home" replace />,
       },
       {
         path: "/home",
@@ -39,12 +39,11 @@ const router = createBrowserRouter([
         element: <Project></Project>,
       },
       {
-        // POV : On utilisera de param comme : /individu/form?project_id="1" pour precise le project cible
         path: "/project/form",
         element: <ProjectForm></ProjectForm>,
       },
       {
-        path: "/project/:nom_project",
+        path: "/project/:id_projet/edit",
         element: <ProjectForm></ProjectForm>,
       },
       // =========================== INDIVIDUE
@@ -53,8 +52,11 @@ const router = createBrowserRouter([
         element: <Individu></Individu>,
       },
       {
-        // POV : On utilisera de param comme : /individu/form?project_id="1" pour precise le project cible
         path: "/individu/form",
+        element: <IndividuForm></IndividuForm>,
+      },
+      {
+        path: "/individu/:id_individue/edit",
         element: <IndividuForm></IndividuForm>,
       },
       //============================ TACHE
@@ -63,17 +65,21 @@ const router = createBrowserRouter([
         element: <Tache></Tache>,
       },
       {
-        path: "/tache/:nom_tache",
-        element: <Tache></Tache>,
+        path: "/tache/form",
+        element: <TacheForm></TacheForm>,
       },
       {
-        path: "/tach/form",
+        path: "/tache/:id_tache/edit",
         element: <TacheForm></TacheForm>,
       },
       // =========================== PROFILE
       {
         path: "/profile",
         element: <Profile></Profile>,
+      },
+      {
+        path: "*",
+        element: <Navigate to="/home" replace />,
       },
     ],
   },

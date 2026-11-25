@@ -1,0 +1,150 @@
+# Task Manager — backend et API
+
+API PHP + MySQL utilisée par l’interface React. Elle gère les comptes, les projets, les tâches, les statuts et les équipes.
+
+## Prérequis
+
+- PHP 8.1+ avec PDO MySQL
+- Composer (pour installer `vendor/`), ou un dossier `backend/vendor/` déjà fourni
+- MySQL / MariaDB
+- Node.js et npm pour le frontend
+
+## Base de données
+
+### Installation neuve
+
+Créez la base `TaskManager-Project-MPD`, puis importez dans cet ordre :
+
+```sh
+mysql -u root -p TaskManager-Project-MPD < backend/database/schema.sql
+mysql -u root -p TaskManager-Project-MPD < backend/database/auth.sql
+```
+
+`schema.sql` contient déjà les tables d’authentification ; `auth.sql` reste fourni pour les installations existantes et ne crée rien deux fois grâce à `CREATE TABLE IF NOT EXISTS`.
+
+Au premier accès à l’application, scrutinisez la page d’inscription pour créer le compte initial. Ensuite, les inscriptions sont fermées : les autres personnes sont ajoutées comme « Personnel » puis affectées aux projets/tâches.
+
+### Mise à jour d’une base existante
+
+Avant toute migration, faites une sauvegarde :
+
+```sh
+mysqldump -u root -p TaskManager-Project-MPD > task_manager_before.sql
+```
+
+Puis appliquez la migration (idempotente) :
+
+```sh
+mysql -u root -p TaskManager-Project-MPD < backend/database/migrations/001_statuses_equipe.sql
+```
+
+Elle ajoute notamment les trois statuts partagés, `Tache.id_status`, `Tache.description`, `Tache.importance`, `Projet.id_utilisateur`, `Projet.id_durre`, `Membre.role`, `Fonction.role` et les suppressions en cascade. Elle peut être relancée sans modifier les données déjà migrées.
+
+## Configuration
+
+Créez `backend/.env` :
+
+```env
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=TaskManager-Project-MPD
+DB_USER=task_manager
+DB_PASSWORD=your_password
+```
+
+## Démarrage
+
+Depuis la racine `task-manager` :
+
+```sh
+composer install --working-dir=backend
+php -S 127.0.0.1:8000 -t backend/public backend/public/index.php
+```
+
+Dans un second terminal :
+
+```sh
+cd frontend
+npm install
+npm run dev
+```
+
+Vite écoute généralement sur `http://localhost:5173` et transmet les requêtes `/api` au serveur PHP sur le port 8000.
+
+## Modèle de données
+
+- `Status_projet` : trois statuts partagés par les projets et les tâches — `todo` (« Pas encore commencé »), `in_progress` (« En cours »), `done` (« Fini »).
+- `Projet` : appartient à un `Utilisateur`, possède sa propre durée (`Durree_projet`) et son statut. Un projet est **solo** quand il n’a aucun membre supplémentaire, **groupe** quand des `Individu` sont inscrits dans `Membre` avec le rôle `chef` ou `membre`.
+- `Tache` : liée à un projet, avec statut, description et importance (`Urgente`, `Importante`, `Non importante`).
+- `Individu` : personne participant aux projets/tâches ; elle peut être liée à un compte `Utilisateur`.
+- `Fonction` : affectation d’une tâche à une personne, avec `role`.
+- `Durree_projet` : dates de création et limite d’un projet.
+
+## API
+
+Toutes les réponses sont JSON. Les routes sont accessibles sous `/api`.
+
+### Authentification
+
+| Requête | Description |
+| --- | --- |
+| `GET /api?auth=status` | État de la session et indication `setupRequired` |
+| `POST /api?auth=register` | Création du compte initial uniquement |
+| `POST /api?auth=login` | Connexion avec `email` et `password` |
+| `POST /api?auth=logout` | Fermeture de la session et écriture dans l’historique |
+| `GET /api?auth=history` | 20 dernières actions du compte connecté |
+
+### Actions composites
+
+| Requête | Description |
+| --- | --- |
+| `POST /api?action=project.save` | Crée/modifie un projet, sa durée, son statut et son équipe |
+| `POST /api?action=task.save` | Crée/modifie une tâche, son statut, son importance et ses affectations |
+
+Exemples de corps :
+
+```json
+{
+  "nom": "Refonte du site",
+  "description": "Objectifs et livrables",
+  "id_status": 2,
+  "limite": "2026-12-31",
+  "membres": [4, 5]
+}
+```
+
+```json
+{
+  "nom": "Rédiger le cahier des charges",
+  "id_projet": 3,
+  "id_status": 1,
+  "importance": "Importante",
+  "assignes": [4]
+}
+```
+
+Ajoutez `id_projet` ou `id_tache` au corps pour modifier un enregistrement existant.
+
+### CRUD générique
+
+`GET`, `POST`, `PUT`, `PATCH` et `DELETE` sont disponibles via :
+
+```text
+/api?resource=projects&id_projet=3
+/api?resource=tasks&id_tache=7
+```
+
+Ressources : `durations`, `individuals`, `competencies`, `statuses`, `projects`, `tasks`, `functions`, `masteries`, `members`.
+
+Les projets et tâches sont filtrés selon le propriétaire ou l’appartenance à l’équipe. La suppression d’un projet supprime ses tâches, affectations et membres, puis sa durée.
+
+## Vérification
+
+```sh
+cd frontend
+npm run build
+npm run lint
+cd ..
+php -l backend/routes/api.php
+php -l backend/public/index.php
+```

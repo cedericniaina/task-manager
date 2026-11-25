@@ -1,17 +1,1 @@
-# Environnement
-backend/.env
-
-# Dependencies
-backend/vendor/
-
-# Frontend
-frontend/
-
-# IDE / OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
+frontend/task-manager/
